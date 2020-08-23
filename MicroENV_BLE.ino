@@ -4,7 +4,7 @@
 #include <Arduino_LSM9DS1.h>
 #include <sps30.h>
 
-#define SP30_COMMS Serial1
+#define SP30_COMMS Serial1  //(S)  {All lines with an S are used for the SPS30 and can be removed if not using an SPS30}
 
 SPS30 sps30;
 
@@ -23,14 +23,14 @@ BLELongCharacteristic sensorLevelChar1("2A6E", BLERead | BLENotify);   // Temper
 BLELongCharacteristic sensorLevelChar2("2A6F", BLERead | BLENotify);   // Humidity-Characteristic
 BLELongCharacteristic sensorLevelChar3("2A6C", BLERead | BLENotify);    // Elevation-Characteristic
 BLELongCharacteristic sensorLevelChar4("2A6D", BLERead | BLENotify); //Pressure Characteristic
-BLELongCharacteristic sensorLevelChar5("2A75", BLERead | BLENotify); //Pollen concentration Characteristic
+BLELongCharacteristic sensorLevelChar5("2A75", BLERead | BLENotify); //Pollen concentration Characteristic  (S)
 
 
 long previousMillis = 0;
 
 void setup() {
   Serial.begin(115200);
-  Serial1.begin(115200);
+  Serial1.begin(115200);   // (S)
   pinMode(LEDB,OUTPUT);
   digitalWrite(LEDB, HIGH);
 
@@ -54,14 +54,14 @@ if (!BLE.begin()) {
     while (1);
 }
 
-if (!sps30.begin(SP30_COMMS)){
-  Serial.println("'Couldn't initialise SPS30");
- 
-}
+if (!sps30.begin(SP30_COMMS)){      // (S)
+  Serial.println("'Couldn't initialise SPS30");   // (S)
+  
+}        // (S)
 
-sps30.EnableDebugging(0);
+sps30.EnableDebugging(0);   // (S)
 
-  BLE.setLocalName("MicroENV by Guntas");
+  BLE.setLocalName("Name to be displayed on BLE Connections");
   BLE.addService(sensorService);
   BLE.setAdvertisedService(sensorService);
   sensorService.addCharacteristic(sensorLevelChar1);
@@ -79,27 +79,28 @@ sps30.EnableDebugging(0);
   BLE.addService(sensorService);
   sensorLevelChar4.writeValue(0);
 
-  sensorService.addCharacteristic(sensorLevelChar5);
-  BLE.addService(sensorService);
+  sensorService.addCharacteristic(sensorLevelChar5);    // (S)
+  BLE.addService(sensorService);    // (S)
+  sensorLevelChar5.writeValue(0);      // (S)
 
-  if (! sps30.begin(SP30_COMMS))
-    Errorloop((char *) "could not initialize communication channel.", 0);
+  if (! sps30.begin(SP30_COMMS))   // (S)
+    Errorloop((char *) "could not initialize communication channel.", 0); // (S)
 
   // check for SPS30 connection
-  if (! sps30.probe()) Errorloop((char *) "could not probe / connect with SPS30.", 0);
-  else  Serial.println(F("Detected SPS30."));
+  if (! sps30.probe()) Errorloop((char *) "could not probe / connect with SPS30.", 0);  // (S)
+  else  Serial.println(F("Detected SPS30."));  // (S)
 
-  SetAutoClean();
+  SetAutoClean();  // (S)
 
   // reset SPS30 connection
-  if (! sps30.reset()) Errorloop((char *) "could not reset.", 0);
+  if (! sps30.reset()) Errorloop((char *) "could not reset.", 0); // (S)
 
   // read device info
-  GetDeviceInfo();
+  GetDeviceInfo();  // (S)
 
   // start measurement
-  if (sps30.start()) Serial.println(F("Set to measurement mode"));
-  else Errorloop((char *) "Could NOT start measurement", 0);
+  if (sps30.start()) Serial.println(F("Set to measurement mode"));  // (S)
+  else Errorloop((char *) "Could NOT start measurement", 0);  // (S)
 
   // start advertising
   BLE.advertise();
@@ -119,8 +120,8 @@ void loop() {
         updateSensorLevel1(); 
         updateSensorLevel2();
         updateSensorLevel3();
-        updateSensorLevel4();
-        read_all();
+        updateSensorLevel4();   
+        read_all();   // (S)
         digitalWrite(LEDB, LOW); // indicate connection
       }
     }
@@ -168,7 +169,7 @@ void updateSensorLevel4() {
   sensorLevelChar4.writeValue(pressure * 1000);
 }
 
-void SetAutoClean()
+void SetAutoClean()  // (S)  This full void is used for the SPS30 only
 {
   uint32_t interval;
   uint8_t ret;
@@ -187,7 +188,7 @@ void SetAutoClean()
 
 
     
-bool read_all()
+bool read_all()    // (S)  This full void is used for the SPS30 only
 {
   static bool header = true;
   uint8_t ret, error_cnt = 0;
@@ -248,7 +249,7 @@ bool read_all()
   return(true);
 }
 
-void Errorloop(char *mess, uint8_t r)
+void Errorloop(char *mess, uint8_t r)   // (S)  This full void is used for the SPS30 only
 {
   if (r) ErrtoMess(mess, r);
   else Serial.println(mess);
@@ -262,7 +263,7 @@ void Errorloop(char *mess, uint8_t r)
  *  @param r : error code
  *
  */
-void ErrtoMess(char *mess, uint8_t r)
+void ErrtoMess(char *mess, uint8_t r)   // (S)  This full void is used for the SPS30 only
 {
   char buf[80];
 
@@ -272,7 +273,7 @@ void ErrtoMess(char *mess, uint8_t r)
   Serial.println(buf);
 }
 
-void GetDeviceInfo()
+void GetDeviceInfo()   // (S)  This full void is used for the SPS30 only
 {
   char buf[32];
   uint8_t ret;
